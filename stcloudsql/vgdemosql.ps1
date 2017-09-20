@@ -1,30 +1,45 @@
-workflow bryanlongsqldemo {
-	inlineScript {
-        $connectionName = "AzureRunAsConnection"
-try
-{
+$connectionName = "AzureRunAsConnection"
+try {
     # Get the connection "AzureRunAsConnection "
     $servicePrincipalConnection=Get-AutomationConnection -Name $connectionName         
-
-    "Logging in to Azure..."
-    Add-AzureRmAccount `
+        "Logging in to Azure..."
+        Add-AzureRmAccount `
         -ServicePrincipal `
         -TenantId $servicePrincipalConnection.TenantId `
         -ApplicationId $servicePrincipalConnection.ApplicationId `
         -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint 
 }
-catch {
-    if (!$servicePrincipalConnection)
+catch 
     {
-        $ErrorMessage = "Connection $connectionName not found."
-        throw $ErrorMessage
-    } else{
-        Write-Error -Message $_.Exception
-        throw $_.Exception
-    }
+        if (!$servicePrincipalConnection){
+            $ErrorMessage = "Connection $connectionName not found."
+            throw $ErrorMessage
+        }       
+        else {
+            Write-Error -Message $_.Exception
+            throw $_.Exception
+        }
 }
+#######################################################################################################################
+#Get CSV
+$resourceGroup="BryanLong"
+$storageAccountName="bryanlongsa1"
+$storageAccount=Get-AzureRmStorageAccount -ResourceGroupName $resourceGroup `
+                                          -Name $storageAccountName
+$ctx=$storageAccount.Context
+$csvpath=".\"
+$containername="sqlcsv"
+$blobname="file.csv"
+Get-AzureStorageBlobContent -Blob $blobname `
+                            -Container $containername
+                            -Destination $csvpath
+                            -Context $ctx
 
-		$connectionstring="Server=tcp:bryanlongsql1.database.windows.net,1433;Initial Catalog=bryanlongvgdemo;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+Import-CSV ".\file.csv" | ForEach-Object {
+    $a=$_.PurchaseOrderID
+    $a
+}
+<#		$connectionstring="Server=tcp:bryanlongsql1.database.windows.net,1433;Initial Catalog=bryanlongvgdemo;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 		$myCredential=Get-AutomationPSCredential -Name 'vgdemosql'
 		$SQLUser= $myCredential.UserName
 		($SQLUserPassword= $myCredential.Password).MakeReadOnly()
@@ -40,5 +55,4 @@ catch {
         $command.CommandText=$query2
 		$command.ExecuteReader()
 		$connection.Close()
-	}
-}
+#>
