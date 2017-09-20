@@ -13,6 +13,7 @@ workflow bryanlongsqldemo {
 		$connection.Open()
 		$command=$connection.CreateCommand()
 		$command.CommandText=$query
+		$command.ExecuteReader()
         $command.CommandText=$query2
 		$command.ExecuteReader()
 		$connection.Close()
