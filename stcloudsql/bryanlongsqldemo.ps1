@@ -5,7 +5,7 @@ workflow bryanlongsqldemo {
 		$SQLUser= $myCredential.UserName
 		($SQLUserPassword= $myCredential.Password).MakeReadOnly()
 		$query="Select * from test"
-        $query2="ALTER TABLE [bryanlongvgdemo].[dbo].[test] ALTER COLUMN [DueDate] varchar(1200) NOT NULL"
+        $query2="ALTER TABLE [bryanlongvgdemo].[dbo].[test] ALTER COLUMN [DueDate] varchar(200) NOT NULL"
 		$Connection=New-Object System.Data.SQLClient.SQLConnection
 		$connection.ConnectionString = $connectionstring
 		$sqlcred=New-Object -TypeName System.Data.SqlClient.SqlCredential($SQLUser, $SQLUserPassword)
